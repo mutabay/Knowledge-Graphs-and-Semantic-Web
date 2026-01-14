@@ -1,0 +1,83 @@
+@prefix univ: <http://aau.at/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# Your actual university
+univ:AAU a univ:University ;
+    foaf:name "Alpen-Adria-Universität Klagenfurt" ;
+    univ:hasLocation "Klagenfurt, Austria" ;
+    univ:website <https://www.aau.at> .
+
+# Real departments
+univ:Informatics a univ:Department ;
+    foaf:name "Department of Informatics" ;
+    univ:partOf univ:AAU .
+
+univ:Mathematics a univ:Department ;
+    foaf:name "Department of Mathematics" ;
+    univ:partOf univ:AAU .
+
+# You as a real student
+univ:you a univ:PhDStudent ;
+    foaf:name "Mustafa Tayyip BAYRAM" ;
+    univ:studiesAt univ:Informatics ;
+    univ:researchArea "Semantic Web Technologies" ;
+    univ:enrolledIn univ:SemanticWeb, univ:DataEngineering, univ:MachineLearning ;
+    foaf:interest univ:AI, univ:KnowledgeGraphs, univ:NLP .
+
+# Real courses (from your actual curriculum)
+univ:SemanticWeb a univ:Course ;
+    dcterms:title "Semantic Web Technologies" ;
+    univ:credits 6 ;
+    univ:offeredBy univ:Informatics ;
+    univ:hasPrerequisite univ:DatabaseSystems ;
+    univ:difficulty "Advanced" ;
+    univ:topics "RDF", "OWL", "SPARQL", "Reasoning" .
+
+univ:DataEngineering a univ:Course ;
+    dcterms:title "Data Engineering" ;
+    univ:credits 6 ;
+    univ:offeredBy univ:Informatics ;
+    univ:hasPrerequisite univ:Statistics, univ:Programming ;
+    univ:difficulty "Intermediate" .
+
+univ:MachineLearning a univ:Course ;
+    dcterms:title "Machine Learning" ;
+    univ:credits 6 ;
+    univ:offeredBy univ:Informatics ;
+    univ:hasPrerequisite univ:Statistics, univ:LinearAlgebra ;
+    univ:relatedTo univ:DataEngineering .
+
+
+# Schema definitions (add this to your existing file)
+univ:University a rdfs:Class .
+univ:Department a rdfs:Class .
+univ:Person a rdfs:Class .
+univ:Student rdfs:subClassOf univ:Person .
+univ:PhDStudent rdfs:subClassOf univ:Student .
+univ:Course a rdfs:Class .
+
+# Missing prerequisite courses
+univ:DatabaseSystems a univ:Course ;
+    dcterms:title "Database Systems" .
+
+univ:Statistics a univ:Course ;
+    dcterms:title "Statistics" .
+
+univ:Programming a univ:Course ;
+    dcterms:title "Programming" .
+
+univ:LinearAlgebra a univ:Course ;
+    dcterms:title "Linear Algebra" .
+
+# Add 2 classmates
+univ:anna a univ:PhDStudent ;
+    foaf:name "Anna K." ;
+    univ:enrolledIn univ:SemanticWeb, univ:MachineLearning ;
+    foaf:interest univ:AI, univ:KnowledgeGraphs .
+
+univ:marco a univ:PhDStudent ;
+    foaf:name "Marco S." ;
+    univ:enrolledIn univ:SemanticWeb, univ:DataEngineering ;
+    foaf:interest univ:KnowledgeGraphs, univ:NLP .
