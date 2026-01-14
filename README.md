@@ -1,8 +1,8 @@
-# Semantic Web Technologies - Course Exercises and Notes
+# Semantic Web Technologies - Exercises and Notes
 
-This repository contains exercises, assignments, and notes from the **Semantic Web Technologies** course, covering the fundamental concepts and practical applications of semantic web technologies including RDF, OWL, SPARQL.
+This repository contains exercises, assignments, and notes from the **Semantic Web Technologies**, covering the fundamental concepts and practical applications of semantic web technologies including RDF, OWL, SPARQL.
 
-## 📚 Course Overview
+## 📚 Overview
 
 Implementation of W3C semantic web standards for knowledge representation and automated reasoning. Focuses on graph-based data models, description logic expressivity, query optimization, and inference engines.
 
