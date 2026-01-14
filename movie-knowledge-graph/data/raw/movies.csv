@@ -1,0 +1,8 @@
+movie_id,title,year,genres,director,rating
+1,The Matrix,1999,Action|Sci-Fi,Lana Wachowski,8.7
+2,Inception,2010,Action|Sci-Fi|Thriller,Christopher Nolan,8.8
+3,Interstellar,2014,Drama|Sci-Fi,Christopher Nolan,8.6
+4,Pulp Fiction,1994,Crime|Drama,Quentin Tarantino,8.9
+5,The Dark Knight,2008,Action|Crime|Drama,Christopher Nolan,9.0
+6,Forrest Gump,1994,Drama|Romance,Robert Zemeckis,8.8
+7,Fight Club,1999,Drama,David Fincher,8.8
