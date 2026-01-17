@@ -293,3 +293,166 @@ Stanford CS520: Knowledge Graphs
 ✅ Comprehensive Documentation
 
 Ready to explore the fascinating world of Knowledge Graphs! 🚀
+
+
+# **Knowledge Graphs - Technical Explanation (Simple)**
+
+## **What is a Knowledge Graph?**
+Instead of storing data in separate tables, a knowledge graph stores **relationships** between things.
+
+**Traditional Database:**
+```
+Movies Table: [ID, Title, Year]
+Directors Table: [ID, Name]
+```
+
+**Knowledge Graph:**
+```
+(Movie: "Inception") --[DIRECTED_BY]--> (Director: "Christopher Nolan")
+(Movie: "Inception") --[HAS_GENRE]--> (Genre: "Sci-Fi")
+```
+
+---
+
+## **Two Main Approaches We Built:**
+
+### **1. RDF (Resource Description Framework)**
+- **Format**: Everything is a **triple** (Subject-Predicate-Object)
+- **Example**: `<Inception> <directedBy> <ChristopherNolan>`
+- **Query Language**: SPARQL
+- **Good for**: Semantic web, standards compliance, reasoning
+
+### **2. Neo4j Property Graph**
+- **Format**: Nodes with properties, connected by relationships
+- **Example**: `(Movie {title: "Inception"})-[:DIRECTED_BY]->(Director {name: "Nolan"})`
+- **Query Language**: Cypher
+- **Good for**: Intuitive queries, performance, analytics
+
+---
+
+## **Key Technical Concepts:**
+
+### **RDF Concepts:**
+- **URI/Namespace**: `http://movie-kg.org/ontology#` - unique identifier space
+- **Triple**: Every fact is Subject-Predicate-Object
+- **Ontology**: Defines what types of things exist and how they relate
+- **SPARQL**: Pattern matching query language
+
+### **Neo4j Concepts:**
+- **Node**: An entity (Movie, Director)
+- **Relationship**: Connection between nodes
+- **Label**: Type of node (`:Movie`, `:Director`)
+- **Property**: Attributes stored on nodes/relationships
+- **Cypher**: Visual ASCII-art query language
+
+---
+
+## **What Our Project Does:**
+
+### **Pipeline Steps:**
+1. **Load CSV data** (movies, directors, genres, ratings)
+2. **Transform into RDF triples** - semantic representation
+3. **Load into Neo4j** - property graph representation
+4. **Run analytics** comparing both approaches
+5. **Generate insights** and recommendations
+
+### **Key Files:**
+- `rdf_builder.py`: Converts CSV → RDF triples
+- `neo4j_loader.py`: Converts CSV → Property graph
+- `analytics.py`: Compares query results from both
+- `pipeline.py`: Orchestrates everything
+
+---
+
+## **Query Comparison:**
+
+### **Same Question, Different Languages:**
+
+**SPARQL (RDF):**
+```sparql
+SELECT ?title WHERE {
+  ?movie movie:hasTitle ?title .
+  ?movie movie:directedBy ?director .
+  ?director foaf:name "Christopher Nolan" .
+}
+```
+
+**Cypher (Neo4j):**
+```cypher
+MATCH (m:Movie)-[:DIRECTED_BY]->(d:Director {name: "Christopher Nolan"})
+RETURN m.title
+```
+
+Both find "movies directed by Christopher Nolan" but use different syntax.
+
+---
+
+## **Why Knowledge Graphs Matter:**
+
+### **Traditional Problems:**
+- Data in silos (separate tables)
+- Complex joins for relationships
+- Hard to find indirect connections
+
+### **Knowledge Graph Solutions:**
+- **Connected data**: Everything linked
+- **Easy traversal**: Follow relationships naturally  
+- **Pattern discovery**: Find hidden connections
+- **Recommendations**: "Movies like this one"
+- **Reasoning**: Infer new knowledge
+
+---
+
+## **Real-World Applications:**
+
+### **What We Built (Simple):**
+- Movie recommendations based on shared genres
+- Director collaboration networks
+- Genre co-occurrence analysis
+
+### **Enterprise Examples:**
+- **Google**: Search results with knowledge panels
+- **Amazon**: Product recommendations
+- **LinkedIn**: "People you may know"
+- **Netflix**: Content recommendation engine
+
+---
+
+## **When to Use Each:**
+
+### **Use RDF/SPARQL When:**
+- Need semantic standards compliance
+- Building for the semantic web
+- Complex reasoning requirements
+- Integration with external linked data
+
+### **Use Neo4j/Cypher When:**
+- Need high performance graph queries
+- Intuitive query language preferred
+- Real-time recommendations
+- Graph analytics and algorithms
+
+---
+
+## **Technical Architecture:**
+
+```
+CSV Data
+    ↓
+┌─────────────────┬─────────────────┐
+│   RDF Builder   │  Neo4j Loader   │
+│   (Triples)     │ (Property Graph)│
+└─────────────────┴─────────────────┘
+    ↓                       ↓
+┌─────────────────┬─────────────────┐
+│ SPARQL Queries  │ Cypher Queries  │
+│ (Pattern Match) │ (Graph Traversal)│
+└─────────────────┴─────────────────┘
+    ↓                       ↓
+┌─────────────────────────────────────┐
+│         Analytics Engine            │
+│    (Compare Results & Insights)     │
+└─────────────────────────────────────┘
+```
+
+**Bottom Line**: We built the same knowledge representation in two different ways to compare their strengths and learn both approaches to graph databases.
