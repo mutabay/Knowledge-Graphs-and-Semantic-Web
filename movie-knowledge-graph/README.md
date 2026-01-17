@@ -1,3 +1,85 @@
+## Movie Knowledge Graph — README (concise)
+
+This repository demonstrates building the same movie knowledge representation two ways: an RDF-based semantic graph (RDFLib + SPARQL) and a Neo4j property graph (Cypher). It's designed for learning, small-scale experiments, and as a reference implementation for ETL → graph → analytics workflows.
+
+Highlights
+- RDF + SPARQL and Neo4j + Cypher implementations
+- End-to-end pipeline: CSV → RDF/Turtle + Neo4j load → analytics
+- Example queries, demos and an interactive exploration notebook
+
+Repository layout
+- data/raw/movies.csv — sample dataset
+- src/ — core implementation (rdf_builder.py, neo4j_loader.py, analytics.py, pipeline.py)
+- queries/ — reusable SPARQL and Cypher query examples
+- notebooks/exploration.ipynb — guided exploration and visualizations
+- run.py — CLI runner for common tasks
+
+Quick start (recommended)
+1. Create and activate a Python venv:
+```bash
+python -m venv venv
+# Windows
+venv\Scripts\activate
+# macOS / Linux
+source venv/bin/activate
+```
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+3. (Optional) Run Neo4j locally using Docker:
+```bash
+docker run -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/password --name movie-neo4j neo4j:latest
+```
+4. Run the full pipeline:
+```bash
+python run.py
+```
+
+Common operations
+- Build RDF only: `python run.py --rdf-only`
+- Load into Neo4j only: `python run.py --neo4j-only`
+- Run analytics only: `python run.py --analytics-only`
+- Interactive demo: `python run.py --demo`
+
+Data format
+CSV columns: `movie_id,title,year,genres,director,rating` (genres separated by `|`)
+
+Examples
+- SPARQL (find Christopher Nolan's movies):
+```sparql
+PREFIX movie: <http://movie-kg.org/ontology#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+SELECT ?title ?year ?rating WHERE {
+    ?movie a movie:Movie ; movie:hasTitle ?title ; movie:releasedIn ?year ; movie:hasRating ?rating ; movie:directedBy ?director .
+    ?director foaf:name "Christopher Nolan" .
+}
+ORDER BY ?year
+```
+- Cypher (same):
+```cypher
+MATCH (m:Movie)-[:DIRECTED_BY]->(d:Director {name: 'Christopher Nolan'})
+RETURN m.title AS title, m.year AS year, m.rating AS rating
+ORDER BY m.year
+```
+
+What I changed (why)
+- Condensed the README into a professional, scannable reference that you can publish on GitHub.
+- Left implementation files, notebooks and data untouched.
+
+Suggested next cleanup steps (I can do these with your approval)
+- Remove or archive large interactive notebooks you won't keep in the repo.
+- Move long, tutorial-style README sections into `docs/` if you want a shorter top-level README.
+- Add a simple `CONTRIBUTING.md` and `LICENSE` if you plan to make this public.
+
+Would you like me to (pick one):
+1) Create a `docs/` folder and move the long-form tutorial content there, keeping the top-level README short, or
+2) Leave the files in place and only add a polished `CONTRIBUTING.md` + `LICENSE`, or
+3) Identify candidate files to delete (I will list them and wait for your OK before removing)?
+
+— Next: if you pick (1) or (3) I'll scan for large files/notebooks and propose a safe deletion/move plan.
+
+— Next: if you pick (1) or (3) I'll scan for large files/notebooks and propose a safe deletion/move plan.
 
 
 
