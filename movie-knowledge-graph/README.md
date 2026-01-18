@@ -248,16 +248,6 @@ When you run `python run.py`, the project:
 
 ---
 
-## 🔮 Future Improvements
-
-- [ ] Add more movies (integrate with IMDB/TMDB API)
-- [ ] Add actors and their relationships
-- [ ] Implement recommendation algorithms
-- [ ] Connect to external knowledge bases (Wikidata)
-- [ ] Build a web interface
-
----
-
 ## 📖 Resources
 
 - [RDFLib Documentation](https://rdflib.readthedocs.io/)
