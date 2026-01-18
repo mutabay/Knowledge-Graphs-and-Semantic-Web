@@ -1,138 +1,224 @@
-# Semantic Web Technologies - Course Exercises and Notes
+# Semantic Web & Knowledge Graphs
 
-This repository contains exercises, assignments, and notes from the **Semantic Web Technologies** course, covering the fundamental concepts and practical applications of semantic web technologies including RDF, OWL, SPARQL.
+A repository for **Semantic Web Technologies** and **Knowledge Graphs** — containing projects, examples, and reference notes for learning and practice.
 
-## 📚 Course Overview
+---
 
-Implementation of W3C semantic web standards for knowledge representation and automated reasoning. Focuses on graph-based data models, description logic expressivity, query optimization, and inference engines.
+## 🎬 Featured: Movie Knowledge Graph
 
-## 🧠 Core Concepts
+A hands-on project exploring knowledge graph implementation using two approaches: **RDF/SPARQL** (W3C standard) and **Neo4j/Cypher** (property graph).
+
+**[→ View Project Details](movie-knowledge-graph/)**
+
+| Implementation | Technologies |
+|----------------|--------------|
+| CSV to knowledge graph pipeline | Python, RDFLib |
+| Dual graph representation | RDF Triples + Neo4j |
+| Query comparison | SPARQL vs Cypher |
+| Analytics & visualization | Jupyter, Plotly |
+
+---
+
+## 📁 Repository Structure
+
+| Directory | Contents |
+|-----------|----------|
+| [movie-knowledge-graph/](movie-knowledge-graph/) | Complete knowledge graph project |
+| [RDFs/](RDFs/) | RDF data and serialization examples |
+| [SPARQL/](SPARQL/) | Query examples and datasets |
+| [OWL Modelling/](OWL%20Modelling/) | Ontology design examples |
+| [OWL Reasoning/](OWL%20Reasoning/) | Reasoning and inference examples |
+
+---
+
+## 🧠 Reference Notes
 
 ### RDF (Resource Description Framework)
-Directed graph model for representing statements as subject-predicate-object triples. URIs provide global identifiers for resources, enabling distributed data integration. Supports multiple serializations (RDF/XML, Turtle, JSON-LD) while maintaining graph semantics.
 
-### RDFS (RDF Schema) 
-Vocabulary extension for RDF providing basic ontological constructs: class hierarchies (`rdfs:subClassOf`), property hierarchies (`rdfs:subPropertyOf`), domain/range constraints. Enables simple inference through entailment rules.
+**Core Model:**
+- Directed graph using subject-predicate-object triples
+- Every statement is a triple: `<subject> <predicate> <object>`
+- URIs provide global, unique resource identifiers
+- Literals for data values (strings, numbers, dates)
+- Blank nodes for anonymous resources
+
+**Serialization Formats:**
+| Format | Use Case |
+|--------|----------|
+| Turtle (.ttl) | Human-readable, compact |
+| RDF/XML (.rdf) | XML-based, legacy systems |
+| JSON-LD (.jsonld) | Web APIs, JavaScript |
+| N-Triples (.nt) | Line-based, streaming |
+| N-Quads (.nq) | N-Triples + named graphs |
+
+**Common Namespaces:**
+```
+rdf:  http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs: http://www.w3.org/2000/01/rdf-schema#
+owl:  http://www.w3.org/2002/07/owl#
+xsd:  http://www.w3.org/2001/XMLSchema#
+foaf: http://xmlns.com/foaf/0.1/
+dc:   http://purl.org/dc/elements/1.1/
+```
+
+---
+
+### RDFS (RDF Schema)
+
+**Class Constructs:**
+- `rdfs:Class` — defines a class
+- `rdfs:subClassOf` — class hierarchy (inheritance)
+- `rdf:type` — instance-of relationship
+
+**Property Constructs:**
+- `rdf:Property` — defines a property
+- `rdfs:subPropertyOf` — property hierarchy
+- `rdfs:domain` — restricts subject type
+- `rdfs:range` — restricts object type
+
+**Inference Rules:**
+- If `A rdfs:subClassOf B` and `x rdf:type A`, then `x rdf:type B`
+- If `p rdfs:domain C` and `x p y`, then `x rdf:type C`
+- If `p rdfs:range C` and `x p y`, then `y rdf:type C`
+
+---
 
 ### OWL (Web Ontology Language)
-Description Logic-based language for expressing complex ontologies. Three profiles: OWL 2 EL (polynomial reasoning), OWL 2 QL (query rewriting), OWL 2 DL (full expressivity with decidable reasoning). Supports class expressions, property characteristics, and cardinality restrictions.
+
+**OWL 2 Profiles:**
+| Profile | Reasoning | Best For |
+|---------|-----------|----------|
+| OWL 2 EL | Polynomial | Large ontologies, classifications |
+| OWL 2 QL | Query rewriting | Database-backed queries |
+| OWL 2 RL | Rule-based | Rule engines, RDF data |
+| OWL 2 DL | Full expressivity | Complete reasoning (decidable) |
+
+**Class Expressions:**
+- `owl:intersectionOf` — AND (conjunction)
+- `owl:unionOf` — OR (disjunction)
+- `owl:complementOf` — NOT (negation)
+- `owl:equivalentClass` — same class
+- `owl:disjointWith` — no common instances
+
+**Property Types:**
+- `owl:ObjectProperty` — links individuals
+- `owl:DatatypeProperty` — links to literals
+- `owl:FunctionalProperty` — at most one value
+- `owl:InverseFunctionalProperty` — unique identifier
+- `owl:TransitiveProperty` — A→B→C implies A→C
+- `owl:SymmetricProperty` — A→B implies B→A
+
+**Restrictions:**
+- `owl:someValuesFrom` — existential (∃) — at least one
+- `owl:allValuesFrom` — universal (∀) — all must be
+- `owl:hasValue` — specific value required
+- `owl:minCardinality`, `owl:maxCardinality`, `owl:cardinality`
+
+---
 
 ### SPARQL
-Graph pattern matching query language for RDF. Declarative syntax with SELECT, CONSTRUCT, ASK, DESCRIBE operations. Features property paths, subqueries, federation, and update operations. Query execution involves join optimization and cost-based planning.
 
-### Semantic Reasoning
-Automated inference using logical rules to derive implicit knowledge. Forward chaining applies rules to derive new facts; backward chaining works from goals. Tableau algorithms for satisfiability checking in description logics.
+**Query Types:**
+| Type | Purpose |
+|------|---------|
+| SELECT | Return variable bindings (table) |
+| CONSTRUCT | Return new RDF graph |
+| ASK | Return boolean (yes/no) |
+| DESCRIBE | Return description of resource |
 
-## 📁 Directory Structure
+**Basic Pattern:**
+```sparql
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
-### 📊 RDFs (RDF Schemas and Data)
-Implementation of RDF graph models with multiple serialization strategies and vocabulary engineering.
+SELECT ?name ?email
+WHERE {
+    ?person a foaf:Person ;
+            foaf:name ?name ;
+            foaf:mbox ?email .
+}
+```
 
-- **q1_foaf.rdf** - FOAF ontology instantiation with social graph modeling
-  - Named graph construction and provenance tracking
-  - Social network topology representation
-  - Identity resolution and data linkage patterns
+**Useful Clauses:**
+- `FILTER` — conditions (regex, comparison, bounds)
+- `OPTIONAL` — left outer join
+- `UNION` — combine patterns
+- `MINUS` — exclude patterns
+- `BIND` — assign computed values
+- `VALUES` — inline data
 
-- **q3.rdf, q4_JSON-LD.txt, q5.txt** - Cross-format serialization examples (RDF/XML, JSON-LD, HTML)
-- **q6_student.ttl** - Academic domain ontology with institutional hierarchies
-- **q7_inferred_student.ttl, q7_student_vocab.ttl** - Forward chaining inference results
-- **q8_inferred_axel.ttl** - ABox reasoning and individual classification
+**Aggregation:**
+- `COUNT`, `SUM`, `AVG`, `MIN`, `MAX`
+- `GROUP BY` — grouping
+- `HAVING` — filter groups
+- `ORDER BY`, `LIMIT`, `OFFSET`
 
-**Technical Implementation:**
-- Graph isomorphism across serialization formats
-- Namespace management and URI dereferencing strategies
-- RDFS entailment regimes and closure operations
-- Blank node handling and canonical serialization
+**Property Paths:**
+- `foaf:knows/foaf:name` — sequence (/)
+- `foaf:knows*` — zero or more (*)
+- `foaf:knows+` — one or more (+)
+- `foaf:knows?` — zero or one (?)
+- `^foaf:knows` — inverse (^)
+- `foaf:knows|foaf:friendOf` — alternative (|)
 
-### 🔍 SPARQL
-Query engine implementation and optimization techniques for RDF graph pattern matching.
+---
 
-#### Query Implementations (.rq) and Execution Plans (.txt):
-- **q1_a.rq** - Graph traversal algorithms for concept extraction
-- **q2.rq** - Multi-constraint filtering with type inference
-- **q3-q10.rq** - Incremental query complexity with string functions and aggregation
+### Reasoning & Inference
 
-#### Knowledge Bases:
-- **PeriodicTable.owl** - Chemical elements domain ontology for querying practice
-- **FOAF.rdf, foaf_1.rdf** - Social network graph structures
-- **rdf_data.ttl** - Benchmark datasets for query performance testing
-- **concepts_and_properties.txt** - Query result validation and cardinality analysis
+**Types of Reasoning:**
+- **Classification** — compute class hierarchy
+- **Realization** — find types of individuals
+- **Consistency checking** — detect contradictions
+- **Satisfiability** — check if class can have instances
 
-**Query Engine Features:**
-- Bottom-up query evaluation with semi-naive evaluation
-- Cost-based optimization with join reordering
-- Property path regular expression compilation
-- Distributed query federation across SPARQL endpoints
-- Aggregate function implementation over bag semantics
-- OPTIONAL clause semantics and left-outer join translation
+**Inference Strategies:**
+- **Forward chaining** — data-driven, apply rules to derive new facts
+- **Backward chaining** — goal-driven, work backwards from query
+- **Tableau algorithm** — systematic satisfiability checking for DL
 
-### 🔧 OWL Modelling
-Description Logic knowledge base construction with formal semantics and decidability analysis.
+**Common Reasoners:**
+| Reasoner | Strengths |
+|----------|-----------|
+| HermiT | OWL 2 DL, hypertableau |
+| Pellet | OWL 2 DL, explanations |
+| FaCT++ | Fast classification |
+| ELK | OWL 2 EL, very large ontologies |
 
-- **Task1-4.owx** - Comprehensive OWL 2 DL ontology engineering:
-  - Taxonomic hierarchies with class intersection and union operations
-  - Object property modeling with domain/range restrictions
-  - Existential and universal quantification over properties
-  - Boolean class constructors and logical equivalence axioms
+**Entailment Regimes:**
+- RDFS entailment — subclass/subproperty inference
+- OWL 2 RL — rule-based OWL subset
+- OWL 2 Direct Semantics — full DL reasoning
 
-- **Task5.owx** - Advanced DL constructs and property characteristics
+---
 
-**Logical Foundations:**
-- OWL 2 DL standard constructs (intersection, union, complement)
-- Property characteristics (domain, range, subProperty)
-- Class equivalence and subsumption axioms
-- Existential and universal property restrictions
+### Knowledge Graph vs Property Graph
 
-### 🧠 OWL Reasoning
-Inference engine implementation and computational complexity analysis of automated reasoning.
+| Aspect | RDF/SPARQL | Neo4j/Cypher |
+|--------|------------|--------------|
+| Data model | Triples | Nodes + Relationships |
+| Schema | Ontology (OWL) | Labels + constraints |
+| Query style | Pattern matching | ASCII-art patterns |
+| Standards | W3C standard | Industry standard |
+| Reasoning | Built-in support | External tools |
+| Best for | Semantic interoperability | Performance, intuitive queries |
 
-- **Question 1.ttl** - Basic reasoning scenarios with:
-  - Class disjointness and subsumption hierarchies
-  - Property domain and range inference
-  - Simple entailment and classification tasks
-  - Human/Alien domain modeling exercises
+---
 
-- **Question 2.rdf** - Academic domain reasoning with Student/Habilitation relationships
+## 🛠️ Tools & Technologies
 
-**Reasoning Foundations:**
-- Basic OWL 2 DL constructs and entailment
-- RDFS inference rules and property inheritance
-- Classification and consistency checking
-- Forward chaining inference with class hierarchies
+| Category | Tools |
+|----------|-------|
+| **Ontology Editors** | Protégé |
+| **Libraries** | RDFLib, Apache Jena |
+| **Reasoners** | HermiT, Pellet |
+| **Graph Databases** | Neo4j |
+| **Formats** | RDF/XML, Turtle, JSON-LD, OWL |
 
-## 🎯 Technical Competencies
+---
 
-### Algorithmic Implementation:
-1. **RDF Graph Processing**
-   - Graph isomorphism and canonical forms
-   - Streaming RDF processing with bounded memory
-   - Blank node skolemization strategies
+## 🔗 Resources
 
-2. **SPARQL Query Processing**
-   - Join ordering optimization using statistics
-   - Adaptive query execution with runtime reoptimization
-   - Distributed query planning across federated endpoints
+- [W3C RDF Primer](https://www.w3.org/TR/rdf11-primer/)
+- [SPARQL 1.1 Specification](https://www.w3.org/TR/sparql11-query/)
+- [RDFLib Documentation](https://rdflib.readthedocs.io/)
+- [Neo4j Documentation](https://neo4j.com/docs/)
 
-3. **Description Logic Reasoning**
-   - Tableaux algorithm implementation with optimization heuristics
-   - Incremental reasoning with explanation tracking
-   - Modular ontology decomposition and reasoning
-
-4. **Knowledge Engineering**
-   - Ontology design patterns and anti-patterns
-   - Competency question formalization
-   - Quality metrics and ontology evaluation methodologies
-
-### Implementation Experience:
-- Reasoner integration (HermiT, Pellet, ELK)
-- Custom SPARQL endpoint development
-- Ontology versioning and evolution strategies
-- Performance profiling and scalability analysis
-
-## 🛠️ Technical Stack
-
-- **Languages**: RDF/XML, Turtle (TTL), JSON-LD, SPARQL
-- **Ontology Tools**: Protégé, OWL API
-- **Reasoners**: HermiT, Pellet, FaCT++
-- **Query Engines**: Apache Jena, Virtuoso, GraphDB
-- **Vocabularies**: FOAF, Schema.org, Dublin Core
