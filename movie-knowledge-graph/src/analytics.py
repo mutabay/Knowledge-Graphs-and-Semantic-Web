@@ -23,22 +23,31 @@ class MovieAnalytics:
 
     def compare_query_approaches(self, director_name: str = "Christopher Nolan"):
         """Compare how the same query works in SPARQL vs Cypher"""
-        print(f"Finding movies by {director_name}")
-        print("=" * 50)
+        print(f"\n🎬 Finding movies by {director_name}")
+        print("-" * 50)
 
         # SPARQL approach
         if self.rdf_builder:
-            print("SPARQL Query (RDF):")
+            print("\n📊 SPARQL Query (RDF):")
             sparql_results = self.sparql_movies_by_director(director_name)
-            for movie in sparql_results:
-                print(f" {movie['title']} ({movie['year']}) - {movie['rating']}")
+            if sparql_results:
+                for movie in sparql_results:
+                    print(f"   • {movie['title']} ({movie['year']}) - Rating: {movie['rating']}")
+            else:
+                print("   No results found")
 
         # Cypher approach
         if self.neo4j_loader:
             print("\n🔍 Cypher Query (Neo4j):")
             cypher_results = self.cypher_movies_by_director(director_name)
-            for movie in cypher_results:
-                print(f" {movie['title']} ({movie['year']}) - {movie['rating']}")
+            if cypher_results:
+                for movie in cypher_results:
+                    print(f"   • {movie['title']} ({movie['year']}) - Rating: {movie['rating']}")
+            else:
+                print("   No results found")
+        else:
+            print("\n🔍 Cypher Query (Neo4j):")
+            print("   ⚠️ Neo4j not available - skipped")
 
     def sparql_movies_by_director(self, director_name):
         """SPARQL query to find movies by director"""

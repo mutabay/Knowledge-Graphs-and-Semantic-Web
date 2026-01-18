@@ -1,0 +1,257 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix movie: <http://movie-kg.org/ontology#> .
+
+# ============================================================
+# Movie Knowledge Graph Ontology
+# ============================================================
+# 
+# This ontology defines the schema for our movie knowledge graph.
+# It describes the types of entities (classes) and their properties
+# (relationships and attributes) in the movie domain.
+#
+# Ontology URI: http://movie-kg.org/ontology#
+# Version: 1.0
+# Author: Movie Knowledge Graph Project
+# ============================================================
+
+# ------------------------------------------------------------
+# Ontology Metadata
+# ------------------------------------------------------------
+
+<http://movie-kg.org/ontology> a owl:Ontology ;
+    dc:title "Movie Knowledge Graph Ontology" ;
+    dc:description "An ontology for representing movies, directors, actors, and genres in a knowledge graph." ;
+    dc:creator "Movie Knowledge Graph Project" ;
+    owl:versionInfo "1.0" .
+
+# ============================================================
+# CLASSES (Types of Entities)
+# ============================================================
+
+# ------------------------------------------------------------
+# Movie Class
+# ------------------------------------------------------------
+movie:Movie a rdfs:Class, owl:Class ;
+    rdfs:label "Movie" ;
+    rdfs:comment "A cinematic work - a motion picture created for entertainment or artistic purposes." ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+# ------------------------------------------------------------
+# Person Classes (Director, Actor)
+# ------------------------------------------------------------
+movie:Person a rdfs:Class, owl:Class ;
+    rdfs:label "Person" ;
+    rdfs:comment "A human being involved in the movie industry." ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+movie:Director a rdfs:Class, owl:Class ;
+    rdfs:label "Director" ;
+    rdfs:comment "A person who directs the making of a movie, controlling its artistic and dramatic aspects." ;
+    rdfs:subClassOf movie:Person ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+movie:Actor a rdfs:Class, owl:Class ;
+    rdfs:label "Actor" ;
+    rdfs:comment "A person who performs in movies, portraying a character." ;
+    rdfs:subClassOf movie:Person ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+# ------------------------------------------------------------
+# Genre Class
+# ------------------------------------------------------------
+movie:Genre a rdfs:Class, owl:Class ;
+    rdfs:label "Genre" ;
+    rdfs:comment "A category or style of movie characterized by particular themes, techniques, or content." ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+# ------------------------------------------------------------
+# User Class (for ratings/reviews)
+# ------------------------------------------------------------
+movie:User a rdfs:Class, owl:Class ;
+    rdfs:label "User" ;
+    rdfs:comment "A person who watches, rates, or reviews movies." ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+# ------------------------------------------------------------
+# Studio Class (for future extension)
+# ------------------------------------------------------------
+movie:Studio a rdfs:Class, owl:Class ;
+    rdfs:label "Studio" ;
+    rdfs:comment "A movie production company or film studio." ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+# ============================================================
+# OBJECT PROPERTIES (Relationships between entities)
+# ============================================================
+
+# ------------------------------------------------------------
+# Movie to Director relationship
+# ------------------------------------------------------------
+movie:directedBy a rdf:Property, owl:ObjectProperty ;
+    rdfs:label "directed by" ;
+    rdfs:comment "Indicates that a movie was directed by a specific director." ;
+    rdfs:domain movie:Movie ;
+    rdfs:range movie:Director ;
+    owl:inverseOf movie:directed ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+movie:directed a rdf:Property, owl:ObjectProperty ;
+    rdfs:label "directed" ;
+    rdfs:comment "Indicates that a director directed a specific movie." ;
+    rdfs:domain movie:Director ;
+    rdfs:range movie:Movie ;
+    owl:inverseOf movie:directedBy ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+# ------------------------------------------------------------
+# Movie to Genre relationship
+# ------------------------------------------------------------
+movie:hasGenre a rdf:Property, owl:ObjectProperty ;
+    rdfs:label "has genre" ;
+    rdfs:comment "Indicates that a movie belongs to a specific genre." ;
+    rdfs:domain movie:Movie ;
+    rdfs:range movie:Genre ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+# ------------------------------------------------------------
+# Movie to Actor relationship
+# ------------------------------------------------------------
+movie:hasActor a rdf:Property, owl:ObjectProperty ;
+    rdfs:label "has actor" ;
+    rdfs:comment "Indicates that an actor performed in a movie." ;
+    rdfs:domain movie:Movie ;
+    rdfs:range movie:Actor ;
+    owl:inverseOf movie:actedIn ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+movie:actedIn a rdf:Property, owl:ObjectProperty ;
+    rdfs:label "acted in" ;
+    rdfs:comment "Indicates that an actor performed in a specific movie." ;
+    rdfs:domain movie:Actor ;
+    rdfs:range movie:Movie ;
+    owl:inverseOf movie:hasActor ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+# ------------------------------------------------------------
+# Movie to Studio relationship (future extension)
+# ------------------------------------------------------------
+movie:producedBy a rdf:Property, owl:ObjectProperty ;
+    rdfs:label "produced by" ;
+    rdfs:comment "Indicates that a movie was produced by a specific studio." ;
+    rdfs:domain movie:Movie ;
+    rdfs:range movie:Studio ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+# ============================================================
+# DATATYPE PROPERTIES (Attributes with literal values)
+# ============================================================
+
+# ------------------------------------------------------------
+# Movie Properties
+# ------------------------------------------------------------
+movie:hasTitle a rdf:Property, owl:DatatypeProperty ;
+    rdfs:label "has title" ;
+    rdfs:comment "The title of a movie." ;
+    rdfs:domain movie:Movie ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+movie:releasedIn a rdf:Property, owl:DatatypeProperty ;
+    rdfs:label "released in" ;
+    rdfs:comment "The year a movie was released." ;
+    rdfs:domain movie:Movie ;
+    rdfs:range xsd:integer ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+movie:hasRating a rdf:Property, owl:DatatypeProperty ;
+    rdfs:label "has rating" ;
+    rdfs:comment "The average rating score of a movie (typically 0-10)." ;
+    rdfs:domain movie:Movie ;
+    rdfs:range xsd:float ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+movie:hasDuration a rdf:Property, owl:DatatypeProperty ;
+    rdfs:label "has duration" ;
+    rdfs:comment "The runtime of a movie in minutes." ;
+    rdfs:domain movie:Movie ;
+    rdfs:range xsd:integer ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+movie:hasPlot a rdf:Property, owl:DatatypeProperty ;
+    rdfs:label "has plot" ;
+    rdfs:comment "A brief description of the movie's plot." ;
+    rdfs:domain movie:Movie ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+# ------------------------------------------------------------
+# Person Properties (using FOAF vocabulary)
+# ------------------------------------------------------------
+# Note: We use foaf:name for person names to align with Linked Data best practices
+
+movie:birthYear a rdf:Property, owl:DatatypeProperty ;
+    rdfs:label "birth year" ;
+    rdfs:comment "The year a person was born." ;
+    rdfs:domain movie:Person ;
+    rdfs:range xsd:integer ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+movie:nationality a rdf:Property, owl:DatatypeProperty ;
+    rdfs:label "nationality" ;
+    rdfs:comment "The nationality or country of origin of a person." ;
+    rdfs:domain movie:Person ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <http://movie-kg.org/ontology> .
+
+# ============================================================
+# GENRE INSTANCES (Common Movie Genres)
+# ============================================================
+
+movie:genre_Action a movie:Genre ;
+    foaf:name "Action" ;
+    rdfs:comment "Movies characterized by physical action, stunts, and chase sequences." .
+
+movie:genre_Comedy a movie:Genre ;
+    foaf:name "Comedy" ;
+    rdfs:comment "Movies intended to make the audience laugh through humor." .
+
+movie:genre_Drama a movie:Genre ;
+    foaf:name "Drama" ;
+    rdfs:comment "Movies with serious, emotionally-driven narratives." .
+
+movie:genre_Sci-Fi a movie:Genre ;
+    foaf:name "Sci-Fi" ;
+    rdfs:comment "Science fiction movies exploring futuristic or scientific concepts." .
+
+movie:genre_Horror a movie:Genre ;
+    foaf:name "Horror" ;
+    rdfs:comment "Movies designed to frighten and invoke fear in audiences." .
+
+movie:genre_Romance a movie:Genre ;
+    foaf:name "Romance" ;
+    rdfs:comment "Movies focused on romantic relationships and love stories." .
+
+movie:genre_Thriller a movie:Genre ;
+    foaf:name "Thriller" ;
+    rdfs:comment "Movies designed to keep audiences in suspense with excitement and tension." .
+
+movie:genre_Crime a movie:Genre ;
+    foaf:name "Crime" ;
+    rdfs:comment "Movies centered around criminal activities and their consequences." .
+
+movie:genre_Documentary a movie:Genre ;
+    foaf:name "Documentary" ;
+    rdfs:comment "Non-fiction movies presenting real events, people, or issues." .
+
+movie:genre_Animation a movie:Genre ;
+    foaf:name "Animation" ;
+    rdfs:comment "Movies created using animation techniques." .
+
+# ============================================================
+# END OF ONTOLOGY
+# ============================================================

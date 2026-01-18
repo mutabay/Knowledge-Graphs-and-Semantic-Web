@@ -28,9 +28,11 @@ class MovieKnowledgeGraphPipeline:
     Main pipeline class that coordinates all componenets
     """
 
-    def __init__(self, csv_path: str, output_dir:str = "output"):
+    def __init__(self, csv_path: str, output_dir:str = "output", neo4j_optional: bool = True):
         self.csv_path = csv_path
         self.output_dir = output_dir
+        self.neo4j_optional = neo4j_optional
+        self.neo4j_available = False
 
         # Create output directory
         os.makedirs(output_dir, exist_ok=True)
@@ -44,22 +46,23 @@ class MovieKnowledgeGraphPipeline:
 
     def run_full_pipeline(self):
         """
-        Run the complete knowledge graph construction pipeline
+        Run the complete knowledge graph construction pipeline.
+        If Neo4j is not available and neo4j_optional=True, continues with RDF-only.
         """
 
         logger.info("Starting the full pipeline...")
 
         try:
-            # Step 1
+            # Step 1: Build RDF graph (always works)
             self.build_rdf_graph()
 
-            # Step 2
-            self.load_neo4j()
+            # Step 2: Try to load Neo4j (optional)
+            self.neo4j_available = self.load_neo4j()
 
-            # Step 3
+            # Step 3: Run analytics (works with RDF even without Neo4j)
             self.run_analytics()
 
-            # Step 4
+            # Step 4: Generate report
             self.generate_report()
 
             logger.info("Pipeline completed successfully.")
@@ -81,15 +84,27 @@ class MovieKnowledgeGraphPipeline:
         logger.info(f"RDF Graph: {rdf_stats}")
 
     def load_neo4j(self):
+        """Load data into Neo4j. Returns True if successful, False otherwise."""
         logger.info("Loading the data into neo4j...")
 
-        self.neo4j_loader = MovieNeo4jLoader()
-        self.neo4j_loader.clear_database() # Fresh start
-        self.neo4j_loader.load_from_csv(self.csv_path)
+        try:
+            self.neo4j_loader = MovieNeo4jLoader()
+            self.neo4j_loader.clear_database()  # Fresh start
+            self.neo4j_loader.load_from_csv(self.csv_path)
 
-        # Print statistics
-        neo4j_stats = self.neo4j_loader.get_statistics()
-        logger.info(f"Neo4j Database: {neo4j_stats}")
+            # Print statistics
+            neo4j_stats = self.neo4j_loader.get_statistics()
+            logger.info(f"Neo4j Database: {neo4j_stats}")
+            return True
+        except Exception as e:
+            if self.neo4j_optional:
+                logger.warning(f"Neo4j not available (skipping): {e}")
+                print("\n⚠️  Neo4j not available - continuing with RDF-only mode")
+                print("   To enable Neo4j, run: podman run -d --name movie-neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/password neo4j:latest\n")
+                self.neo4j_loader = None
+                return False
+            else:
+                raise
 
 
     def run_analytics(self):
@@ -102,15 +117,19 @@ class MovieKnowledgeGraphPipeline:
         )
 
         # Compare query approaches
-        print("\n + ""="*40)
-        print("Knowledge Graph Analytics Comparison")
-        print("\n + ""=" * 40)
+        print("\n" + "="*50)
+        print("📊 Knowledge Graph Analytics")
+        print("=" * 50)
 
         self.analytics.compare_query_approaches(director_name="Christopher Nolan")
 
-        # Additional analytics can be added here
-        self.genre_analysis()
-        self.rating_analysis()
+        # Additional analytics (only if Neo4j is available)
+        if self.neo4j_available and self.neo4j_loader:
+            self.genre_analysis()
+            self.rating_analysis()
+        else:
+            print("\n📝 Note: Additional analytics skipped (Neo4j not available)")
+            print("   Run with Neo4j for full analytics capabilities")
 
     def genre_analysis(self):
         """ Analyze movies by genre"""

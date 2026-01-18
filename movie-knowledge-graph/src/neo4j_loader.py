@@ -31,8 +31,8 @@ class MovieNeo4jLoader:
         """
         Initialize connection to Neo4j database.
 
-        Make sure Neo4j is running! Start it with Docker:
-        docker run -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/password neo4j
+        Make sure Neo4j is running! Start it with Podman (or Docker):
+        podman run -d --name movie-neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/password neo4j:latest
         """
         try:
             self.driver = GraphDatabase.driver(uri, auth=(user, password))

@@ -1,0 +1,10 @@
+Movie Knowledge Graph Pipeline Report
+========================================
+
+RDF Knowledge Graph Statistics:
+  movies: 7
+  directors: 0
+  genres: 0
+  total_triples: 94
+
+Pipeline completed successfully!

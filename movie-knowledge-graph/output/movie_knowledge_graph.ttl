@@ -1,0 +1,129 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix xsd1: <http://movie-kg.org/ontology#> .
+
+xsd1:Actor a rdfs:Class ;
+    rdfs:comment "A person who performs in movies" .
+
+xsd1:Director a rdfs:Class ;
+    rdfs:comment "A person who directs movies" .
+
+xsd1:Genre a rdfs:Class ;
+    rdfs:comment "A category or style of movie" .
+
+xsd1:Movie a rdfs:Class ;
+    rdfs:comment "A cinematic work" .
+
+xsd1:User a rdfs:Class ;
+    rdfs:comment "A person who rates or reviews movies" .
+
+xsd1:actedIn a rdf:Property ;
+    rdfs:comment "An actor performed in this movie" .
+
+xsd1:directedBy a rdf:Property ;
+    rdfs:comment "A movie was directed by this person" .
+
+xsd1:hasGenre a rdf:Property ;
+    rdfs:comment "A movie belongs to this genre" .
+
+xsd1:hasRating a rdf:Property ;
+    rdfs:comment "The rating score of a movie" .
+
+xsd1:hasTitle a rdf:Property ;
+    rdfs:comment "The title of a movie" .
+
+xsd1:movie_1 a xsd1:Movie ;
+    xsd1:directedBy xsd1:director_Lana_Wachowski ;
+    xsd1:hasGenre xsd1:genre_Action,
+        xsd1:genre_Sci-Fi ;
+    xsd1:hasRating "8.7"^^xsd:float ;
+    xsd1:hasTitle "The Matrix" ;
+    xsd1:releasedIn 1999 .
+
+xsd1:movie_2 a xsd1:Movie ;
+    xsd1:directedBy xsd1:director_Christopher_Nolan ;
+    xsd1:hasGenre xsd1:genre_Action,
+        xsd1:genre_Sci-Fi,
+        xsd1:genre_Thriller ;
+    xsd1:hasRating "8.8"^^xsd:float ;
+    xsd1:hasTitle "Inception" ;
+    xsd1:releasedIn 2010 .
+
+xsd1:movie_3 a xsd1:Movie ;
+    xsd1:directedBy xsd1:director_Christopher_Nolan ;
+    xsd1:hasGenre xsd1:genre_Drama,
+        xsd1:genre_Sci-Fi ;
+    xsd1:hasRating "8.6"^^xsd:float ;
+    xsd1:hasTitle "Interstellar" ;
+    xsd1:releasedIn 2014 .
+
+xsd1:movie_4 a xsd1:Movie ;
+    xsd1:directedBy xsd1:director_Quentin_Tarantino ;
+    xsd1:hasGenre xsd1:genre_Crime,
+        xsd1:genre_Drama ;
+    xsd1:hasRating "8.9"^^xsd:float ;
+    xsd1:hasTitle "Pulp Fiction" ;
+    xsd1:releasedIn 1994 .
+
+xsd1:movie_5 a xsd1:Movie ;
+    xsd1:directedBy xsd1:director_Christopher_Nolan ;
+    xsd1:hasGenre xsd1:genre_Action,
+        xsd1:genre_Crime,
+        xsd1:genre_Drama ;
+    xsd1:hasRating "9.0"^^xsd:float ;
+    xsd1:hasTitle "The Dark Knight" ;
+    xsd1:releasedIn 2008 .
+
+xsd1:movie_6 a xsd1:Movie ;
+    xsd1:directedBy xsd1:director_Robert_Zemeckis ;
+    xsd1:hasGenre xsd1:genre_Drama,
+        xsd1:genre_Romance ;
+    xsd1:hasRating "8.8"^^xsd:float ;
+    xsd1:hasTitle "Forrest Gump" ;
+    xsd1:releasedIn 1994 .
+
+xsd1:movie_7 a xsd1:Movie ;
+    xsd1:directedBy xsd1:director_David_Fincher ;
+    xsd1:hasGenre xsd1:genre_Drama ;
+    xsd1:hasRating "8.8"^^xsd:float ;
+    xsd1:hasTitle "Fight Club" ;
+    xsd1:releasedIn 1999 .
+
+xsd1:releasedIn a rdf:Property ;
+    rdfs:comment "The year a movie was released" .
+
+xsd1:director_David_Fincher a xsd1:director ;
+    foaf:name "David Fincher" .
+
+xsd1:director_Lana_Wachowski a xsd1:director ;
+    foaf:name "Lana Wachowski" .
+
+xsd1:director_Quentin_Tarantino a xsd1:director ;
+    foaf:name "Quentin Tarantino" .
+
+xsd1:director_Robert_Zemeckis a xsd1:director ;
+    foaf:name "Robert Zemeckis" .
+
+xsd1:genre_Romance a xsd1:genre ;
+    foaf:name "http://movie-kg.org/ontology#genre_Romance" .
+
+xsd1:genre_Thriller a xsd1:genre ;
+    foaf:name "http://movie-kg.org/ontology#genre_Thriller" .
+
+xsd1:genre_Crime a xsd1:genre ;
+    foaf:name "http://movie-kg.org/ontology#genre_Crime" .
+
+xsd1:director_Christopher_Nolan a xsd1:director ;
+    foaf:name "Christopher Nolan" .
+
+xsd1:genre_Action a xsd1:genre ;
+    foaf:name "http://movie-kg.org/ontology#genre_Action" .
+
+xsd1:genre_Sci-Fi a xsd1:genre ;
+    foaf:name "http://movie-kg.org/ontology#genre_Sci-Fi" .
+
+xsd1:genre_Drama a xsd1:genre ;
+    foaf:name "http://movie-kg.org/ontology#genre_Drama" .
+

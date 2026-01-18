@@ -263,7 +263,7 @@ def check_prerequisites():
     except Exception as e:
         print(f"⚠️  Neo4j connection failed: {e}")
         print("   Neo4j operations will be skipped")
-        print("   Start Neo4j with: docker run -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/password neo4j")
+        print("   Start Neo4j with: podman run -d --name movie-neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/password neo4j:latest")
 
     # Create output directory
     os.makedirs("output", exist_ok=True)

@@ -1,735 +1,270 @@
-## Movie Knowledge Graph — README (concise)
+# 🎬 Movie Knowledge Graph
 
-This repository demonstrates building the same movie knowledge representation two ways: an RDF-based semantic graph (RDFLib + SPARQL) and a Neo4j property graph (Cypher). It's designed for learning, small-scale experiments, and as a reference implementation for ETL → graph → analytics workflows.
+A hands-on learning project for **Knowledge Graphs** and **Semantic Web** technologies, implementing the same movie database using two different approaches: **RDF/SPARQL** and **Neo4j/Cypher**.
 
-Highlights
-- RDF + SPARQL and Neo4j + Cypher implementations
-- End-to-end pipeline: CSV → RDF/Turtle + Neo4j load → analytics
-- Example queries, demos and an interactive exploration notebook
+---
 
-Repository layout
-- data/raw/movies.csv — sample dataset
-- src/ — core implementation (rdf_builder.py, neo4j_loader.py, analytics.py, pipeline.py)
-- queries/ — reusable SPARQL and Cypher query examples
-- notebooks/exploration.ipynb — guided exploration and visualizations
-- run.py — CLI runner for common tasks
+## 📖 What is This Project?
 
-Quick start (recommended)
-1. Create and activate a Python venv:
-```bash
-python -m venv venv
-# Windows
-venv\Scripts\activate
-# macOS / Linux
-source venv/bin/activate
+This project is my personal learning journey into knowledge graphs, created during my PhD studies. It demonstrates how to:
+
+1. **Transform tabular data** (CSV) into interconnected knowledge graphs
+2. **Compare two major approaches**: RDF (Semantic Web) vs Property Graphs (Neo4j)
+3. **Query knowledge graphs** using SPARQL and Cypher
+4. **Analyze and visualize** graph-structured data
+
+### Why Two Approaches?
+
+| Aspect | RDF/SPARQL | Neo4j/Cypher |
+|--------|------------|--------------|
+| **Standard** | W3C Standard | Industry Standard |
+| **Data Model** | Triples (Subject-Predicate-Object) | Nodes + Relationships |
+| **Query Style** | Pattern matching with namespaces | ASCII-art graph patterns |
+| **Best For** | Semantic reasoning, linked data | Performance, intuitive queries |
+
+---
+
+## What is a Knowledge Graph?
+
+A **Knowledge Graph** stores information as a network of **entities** (nodes) and **relationships** (edges), instead of traditional tables.
+
+### Example: Traditional Table vs Knowledge Graph
+
+**Traditional (Relational):**
 ```
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-3. (Optional) Run Neo4j locally using Docker:
-```bash
-docker run -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/password --name movie-neo4j neo4j:latest
-```
-4. Run the full pipeline:
-```bash
-python run.py
-```
-
-Common operations
-- Build RDF only: `python run.py --rdf-only`
-- Load into Neo4j only: `python run.py --neo4j-only`
-- Run analytics only: `python run.py --analytics-only`
-- Interactive demo: `python run.py --demo`
-
-Data format
-CSV columns: `movie_id,title,year,genres,director,rating` (genres separated by `|`)
-
-Examples
-- SPARQL (find Christopher Nolan's movies):
-```sparql
-PREFIX movie: <http://movie-kg.org/ontology#>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-SELECT ?title ?year ?rating WHERE {
-    ?movie a movie:Movie ; movie:hasTitle ?title ; movie:releasedIn ?year ; movie:hasRating ?rating ; movie:directedBy ?director .
-    ?director foaf:name "Christopher Nolan" .
-}
-ORDER BY ?year
-```
-- Cypher (same):
-```cypher
-MATCH (m:Movie)-[:DIRECTED_BY]->(d:Director {name: 'Christopher Nolan'})
-RETURN m.title AS title, m.year AS year, m.rating AS rating
-ORDER BY m.year
+Movies Table: ID=1, Title="Inception", Director_ID=5
+Directors Table: ID=5, Name="Christopher Nolan"
 ```
 
-What I changed (why)
-- Condensed the README into a professional, scannable reference that you can publish on GitHub.
-- Left implementation files, notebooks and data untouched.
+**Knowledge Graph:**
+```
+(Inception)--[DIRECTED_BY]-->(Christopher Nolan)
+(Inception)--[HAS_GENRE]-->(Sci-Fi)
+(Interstellar)--[DIRECTED_BY]-->(Christopher Nolan)
+```
 
-Suggested next cleanup steps (I can do these with your approval)
-- Remove or archive large interactive notebooks you won't keep in the repo.
-- Move long, tutorial-style README sections into `docs/` if you want a shorter top-level README.
-- Add a simple `CONTRIBUTING.md` and `LICENSE` if you plan to make this public.
+The power? You can now easily ask: *"What other movies did Inception's director make?"* - just follow the edges!
 
-Would you like me to (pick one):
-1) Create a `docs/` folder and move the long-form tutorial content there, keeping the top-level README short, or
-2) Leave the files in place and only add a polished `CONTRIBUTING.md` + `LICENSE`, or
-3) Identify candidate files to delete (I will list them and wait for your OK before removing)?
+### RDF Triple Structure
 
-— Next: if you pick (1) or (3) I'll scan for large files/notebooks and propose a safe deletion/move plan.
+In RDF, every fact is a **triple**: `Subject → Predicate → Object`
 
-— Next: if you pick (1) or (3) I'll scan for large files/notebooks and propose a safe deletion/move plan.
+```turtle
+movie:Inception  movie:directedBy  movie:ChristopherNolan .
+movie:Inception  movie:hasGenre    movie:SciFi .
+movie:Inception  movie:hasRating   "8.8"^^xsd:float .
+```
 
+---
 
+## 🏗 Project Architecture
 
-What is a Knowledge Graph?
-Think of it as a smart network of connected facts:
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     movies.csv (Raw Data)                   │
+│  movie_id, title, year, genres, director, rating            │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+        ┌─────────────┴─────────────┐
+        ▼                           ▼
+┌───────────────────┐     ┌───────────────────┐
+│   RDF Builder     │     │   Neo4j Loader    │
+│   (rdf_builder.py)│     │   (neo4j_loader.py)│
+└─────────┬─────────┘     └─────────┬─────────┘
+          │                         │
+          ▼                         ▼
+┌───────────────────┐     ┌───────────────────┐
+│  Turtle File      │     │   Neo4j Database  │
+│  (.ttl)           │     │   (Graph DB)      │
+│                   │     │                   │
+│  Query: SPARQL    │     │  Query: Cypher    │
+└───────────────────┘     └───────────────────┘
+          │                         │
+          └────────────┬────────────┘
+                       ▼
+              ┌─────────────────┐
+              │   Analytics &   │
+              │  Visualizations │
+              └─────────────────┘
+```
 
-Nodes = Entities (Movies, Actors, Users)
-Edges = Relationships (acted_in, directed, rated)
-Properties = Attributes (name, year, rating)
-
-RDF Triple Structure
-Every fact is a Subject-Predicate-Object triple:
-
-<Tom_Hanks> <acted_in> <Forrest_Gump>
-<Forrest_Gump> <has_genre> <Drama>
-<User123> <rated> <Forrest_Gump>
-
-
-# 🎬 Movie Knowledge Graph Project
-
-A comprehensive implementation demonstrating **Knowledge Graph construction** using both **RDF/SPARQL** and **Neo4j/Cypher** approaches. This project showcases how to transform tabular movie data into rich, interconnected knowledge representations suitable for advanced analytics and recommendations.
-
-## 🎯 Project Overview
-
-This project was built as a **learning journey** to understand:
-
-### **What We Built:**
-- **RDF Knowledge Graph**: Semantic web standards using RDF triples and SPARQL queries
-- **Neo4j Property Graph**: Intuitive graph database with Cypher query language  
-- **Comparative Analytics**: Side-by-side analysis of both approaches
-- **Data Pipeline**: Complete ETL process from CSV to knowledge graphs
-- **Query Examples**: Comprehensive collection of graph queries
-
-### **Why Knowledge Graphs?**
-Traditional databases store data in tables. Knowledge graphs store **relationships** and **context**:
-Traditional: Movie table + Director table + Genre table
-Knowledge Graph: (Movie)-[DIRECTED_BY]->(Director)-[WORKED_IN]->(Genre)
-
-
-This enables:
-- **Semantic Understanding**: What does the data *mean*?
-- **Complex Relationships**: Multi-hop queries across entities
-- **Reasoning**: Infer new knowledge from existing facts
-- **Recommendations**: Find patterns and similarities
-
-## 🏗️ Architecture
-📁 movie-knowledge-graph/
-├── 📊 data/raw/movies.csv # Source data
-├── 🧠 src/
-│ ├── rdf_builder.py # RDF/SPARQL implementation
-│ ├── neo4j_loader.py # Neo4j/Cypher implementation
-│ ├── analytics.py # Comparative analytics
-│ └── pipeline.py # Main orchestrator
-├── 🔍 queries/
-│ ├── sparql_examples.py # SPARQL query library
-│ └── cypher_examples.py # Cypher query library
-├── 📓 notebooks/
-│ └── exploration.ipynb # Interactive exploration
-├── 📤 output/ # Generated knowledge graphs
-└── 🚀 run.py # Main execution script
-
-
-
-## 🛠️ Technology Stack
-
-### **RDF/Semantic Web Stack:**
-- **RDFLib**: Python RDF manipulation library
-- **SPARQL**: W3C standard query language for RDF
-- **Turtle**: Human-readable RDF serialization format
-- **Ontologies**: Formal domain knowledge representation
-
-### **Property Graph Stack:**
-- **Neo4j**: Leading graph database platform
-- **Cypher**: Intuitive graph query language
-- **Bolt Protocol**: High-performance database communication
-- **APOC**: Advanced procedures and functions
-
-### **Data Processing:**
-- **Pandas**: Data manipulation and analysis
-- **NetworkX**: Graph algorithms and visualization
-- **Jupyter**: Interactive data exploration
+---
 
 ## 🚀 Quick Start
 
-### **Prerequisites**
+### Prerequisites
+- Python 3.8+
+- (Optional) Podman or Docker for Neo4j
 
-1. **Python 3.8+**
+### Installation
+
 ```bash
-python --version  # Should be 3.8 or higher
-```
-
-2. Neo4j Database
-# Option 1: Docker (Recommended)
-docker run -p 7474:7474 -p 7687:7687 \
-  -e NEO4J_AUTH=neo4j/password \
-  --name movie-neo4j neo4j:latest
-
-# Option 2: Download from https://neo4j.com/download/
-
-Installation
-1. Clone the repository:
-git clone <your-repo-url>
+# Clone the repository
+git clone https://github.com/yourusername/movie-knowledge-graph.git
 cd movie-knowledge-graph
 
-2. Create virtual environment:
+# Create virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+venv\Scripts\activate  # Windows
+# source venv/bin/activate  # macOS/Linux
 
-3. Install dependencies:
+# Install dependencies
 pip install -r requirements.txt
+```
 
-4. Verify Neo4j connection:
-# Neo4j Browser: http://localhost:7474
-# Username: neo4j, Password: password
+### Run the Project
 
-### **Running the Project**
-
-1. Option 1: Full Pipeline (Recommended)
+```bash
+# Run full pipeline (works even without Neo4j!)
 python run.py
-2. Option 2: Step by Step
-# 1. Build RDF Knowledge Graph
-python -m src.rdf_builder
 
-# 2. Load into Neo4j  
-python -m src.neo4j_loader
+# Or run specific components:
+python run.py --rdf-only      # Build RDF graph only
+python run.py --neo4j-only    # Neo4j only (requires Neo4j running)
+python run.py --demo          # Interactive demo
+```
 
-# 3. Run Analytics
-python -m src.analytics
+### (Optional) Start Neo4j with Podman
 
-3. Option 3: Interactive Exploration
-jupyter notebook notebooks/exploration.ipynb
+```bash
+podman run -d \
+  --name movie-neo4j \
+  -p 7474:7474 \
+  -p 7687:7687 \
+  -e NEO4J_AUTH=neo4j/password \
+  neo4j:latest
+```
 
-📊 Sample Data
-The project includes movie data with the following structure:
+Then access Neo4j Browser at: http://localhost:7474
 
-movie_id,title,year,genres,director,rating
-1,The Matrix,1999,Action|Sci-Fi,Lana Wachowski,8.7
-2,Inception,2010,Action|Sci-Fi|Thriller,Christopher Nolan,8.8
-3,Interstellar,2014,Drama|Sci-Fi,Christopher Nolan,8.6
+---
 
+## 📁 Project Structure
 
-Entities Created:
-Movies: 7 films with titles, years, ratings
-Directors: 6 unique directors
-Genres: 6 different genres
-Relationships: 20+ connections between entities
+```
+movie-knowledge-graph/
+├── run.py                    # Main entry point
+├── requirements.txt          # Python dependencies
+├── data/
+│   └── raw/movies.csv        # Source dataset (7 sample movies)
+├── src/
+│   ├── rdf_builder.py        # RDF/SPARQL implementation
+│   ├── neo4j_loader.py       # Neo4j/Cypher implementation
+│   ├── analytics.py          # Query comparisons
+│   ├── pipeline.py           # Orchestrates everything
+│   └── visualizations.py     # Charts and graphs
+├── queries/
+│   ├── sparql_examples.py    # SPARQL query collection
+│   └── cypher_examples.py    # Cypher query collection
+├── notebooks/
+│   └── exploration.ipynb     # Interactive Jupyter notebook
+├── ontology/
+│   └── movie_ontology.ttl    # Formal ontology definition
+└── output/
+    ├── movie_knowledge_graph.ttl   # Generated RDF graph
+    └── visualizations/             # Generated charts
+```
 
-🔍 Query Examples
-SPARQL (RDF) Example:
+---
 
+## 🔍 Query Examples
+
+### SPARQL (RDF) - Find movies by director
+
+```sparql
 PREFIX movie: <http://movie-kg.org/ontology#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 SELECT ?title ?year ?rating
 WHERE {
-    ?movie a movie:Movie .
-    ?movie movie:hasTitle ?title .
-    ?movie movie:releasedIn ?year .
-    ?movie movie:hasRating ?rating .
-    ?movie movie:directedBy ?director .
+    ?m a movie:Movie ;
+       movie:hasTitle ?title ;
+       movie:releasedIn ?year ;
+       movie:hasRating ?rating ;
+       movie:directedBy ?director .
     ?director foaf:name "Christopher Nolan" .
 }
 ORDER BY ?year
+```
 
-Cypher (Neo4j) Example:
-MATCH (m:Movie)-[:DIRECTED_BY]->(d:Director {name: 'Christopher Nolan'})
-RETURN m.title as title, m.year as year, m.rating as rating
+### Cypher (Neo4j) - Same query, different syntax
+
+```cypher
+MATCH (m:Movie)-[:DIRECTED_BY]->(d:Director {name: "Christopher Nolan"})
+RETURN m.title AS title, m.year AS year, m.rating AS rating
 ORDER BY m.year
-
-Both queries find Christopher Nolan's movies, but notice:
-
-SPARQL: More verbose, standards-based, great for semantic reasoning
-Cypher: More intuitive, ASCII art syntax, great for graph traversal
-
-
-🧪 What You'll Learn
-RDF & Semantic Web Concepts:
-Triples: Subject-Predicate-Object statements
-URIs: Unique resource identification
-Namespaces: Avoiding naming conflicts
-Ontologies: Formal domain modeling
-SPARQL: Pattern-matching queries
-Linked Data: Web-scale knowledge integration
-Property Graph Concepts:
-Nodes & Relationships: Intuitive graph modeling
-Labels & Properties: Flexible data structures
-Cypher: Visual query language
-Graph Algorithms: PageRank, community detection
-Performance: Indexes, constraints, query optimization
-Graph Analytics: Centrality, clustering, pathfinding
-Comparative Analysis:
-When to use RDF vs Property Graphs
-Query language differences (SPARQL vs Cypher)
-Performance characteristics
-Ecosystem and tooling
-Standards compliance vs pragmatic flexibility
-📈 Analytics & Insights
-The project demonstrates various analytical capabilities:
-
-Basic Queries:
-Find all movies by a director
-List movies by genre
-Get highest-rated films
-Advanced Analytics:
-Director collaboration networks
-Genre co-occurrence patterns
-Movie recommendation algorithms
-Decade-based trend analysis
-Shortest path between directors
-Graph Algorithms:
-Centrality measures (identify important nodes)
-Community detection (find clusters)
-Pathfinding (connect entities)
-Similarity calculations
-🔧 Customization
-Adding New Data:
-Update data/raw/movies.csv with your data
-Modify entity types in rdf_builder.py and neo4j_loader.py
-Add new query patterns in the queries/ directory
-
-Extending the Ontology:
-# In rdf_builder.py, add new classes:
-self.MOVIE.Actor: "Aperson who acts in movies"
-self.MOVIE.Studio: "A movie production company"
-
-# Add new relationships:
-self.MOVIE.actedIn: "Actor performed in movie"
-self.MOVIE.producedBy: "Movie produced by studio"
-
-
-New Analytics:
-# In analytics.py, add new comparison methods:
-def analyze_actor_networks(self):
-    # Compare actor collaboration patterns
-    # Between RDF and Neo4j approaches
-
-🐛 Troubleshooting
-Common Issues:
-Neo4j Connection Failed:
-# Check if Neo4j is running
-docker ps | grep neo4j
-
-# Check logs
-docker logs movie-neo4j
-
-Memory Issues with Large Datasets:
-
-# In neo4j_loader.py, use batch processing:
-def load_in_batches(self, df, batch_size=100):
-    for i in range(0, len(df), batch_size):
-        batch = df[i:i+batch_size]
-        # Process batch
-
-
-SPARQL Query Timeouts:
-# In rdf_builder.py, optimize queries:
-# Add LIMIT clauses for large datasets
-query += " LIMIT 1000"
-
-
-🎓 Learning Path
-Beginner → Intermediate → Advanced
-
-Start Here: Run python run.py and explore the output
-Understand Queries: Study queries/sparql_examples.py and queries/cypher_examples.py
-Interactive Learning: Open notebooks/exploration.ipynb
-Modify Data: Add your own movies to the CSV
-Create Queries: Write new analytical queries
-Extend Schema: Add actors, studios, reviews
-Performance Tuning: Optimize for larger datasets
-Advanced Analytics: Implement recommendation algorithms
-📚 Resources & References
-RDF & Semantic Web:
-RDFLib Documentation
-SPARQL 1.1 Specification
-Linked Data Principles
-Neo4j & Property Graphs:
-Neo4j Documentation
-Cypher Query Language
-Graph Data Science Library
-Knowledge Graphs:
-Knowledge Graph Cookbook
-Stanford CS520: Knowledge Graphs
-
-
-
-
-🎯 Project Goals Achieved
-✅ RDF Knowledge Graph Construction
-✅ Neo4j Property Graph Implementation
-✅ SPARQL Query Mastery
-✅ Cypher Query Proficiency
-✅ Comparative Graph Analytics
-✅ End-to-End Data Pipeline
-✅ Interactive Exploration Tools
-✅ Comprehensive Documentation
-
-Ready to explore the fascinating world of Knowledge Graphs! 🚀
-
-
-# **Knowledge Graphs - Technical Explanation (Simple)**
-
-## **What is a Knowledge Graph?**
-Instead of storing data in separate tables, a knowledge graph stores **relationships** between things.
-
-**Traditional Database:**
-```
-Movies Table: [ID, Title, Year]
-Directors Table: [ID, Name]
 ```
 
-**Knowledge Graph:**
-```
-(Movie: "Inception") --[DIRECTED_BY]--> (Director: "Christopher Nolan")
-(Movie: "Inception") --[HAS_GENRE]--> (Genre: "Sci-Fi")
-```
+### Results (both queries return the same data):
+
+| title | year | rating |
+|-------|------|--------|
+| The Dark Knight | 2008 | 9.0 |
+| Inception | 2010 | 8.8 |
+| Interstellar | 2014 | 8.6 |
 
 ---
 
-## **Two Main Approaches We Built:**
+## 📊 What Gets Generated
 
-### **1. RDF (Resource Description Framework)**
-- **Format**: Everything is a **triple** (Subject-Predicate-Object)
-- **Example**: `<Inception> <directedBy> <ChristopherNolan>`
-- **Query Language**: SPARQL
-- **Good for**: Semantic web, standards compliance, reasoning
+When you run `python run.py`, the project:
 
-### **2. Neo4j Property Graph**
-- **Format**: Nodes with properties, connected by relationships
-- **Example**: `(Movie {title: "Inception"})-[:DIRECTED_BY]->(Director {name: "Nolan"})`
-- **Query Language**: Cypher
-- **Good for**: Intuitive queries, performance, analytics
+1. **Builds an RDF Knowledge Graph** → `output/movie_knowledge_graph.ttl`
+   - Creates triples for movies, directors, genres
+   - Defines ontology classes and properties
+   
+2. **Loads into Neo4j** (if available)
+   - Creates nodes: Movie, Director, Genre
+   - Creates relationships: DIRECTED_BY, HAS_GENRE
 
----
+3. **Runs Analytics**
+   - Compares SPARQL vs Cypher query results
+   - Shows director and genre analysis
 
-## **Key Technical Concepts:**
-
-### **RDF Concepts:**
-- **URI/Namespace**: `http://movie-kg.org/ontology#` - unique identifier space
-- **Triple**: Every fact is Subject-Predicate-Object
-- **Ontology**: Defines what types of things exist and how they relate
-- **SPARQL**: Pattern matching query language
-
-### **Neo4j Concepts:**
-- **Node**: An entity (Movie, Director)
-- **Relationship**: Connection between nodes
-- **Label**: Type of node (`:Movie`, `:Director`)
-- **Property**: Attributes stored on nodes/relationships
-- **Cypher**: Visual ASCII-art query language
+4. **Generates Visualizations** → `output/visualizations/`
+   - Genre distribution charts
+   - Knowledge graph network diagram
+   - Director analysis plots
 
 ---
 
-## **What Our Project Does:**
+## 📚 Key Concepts I Learned
 
-### **Pipeline Steps:**
-1. **Load CSV data** (movies, directors, genres, ratings)
-2. **Transform into RDF triples** - semantic representation
-3. **Load into Neo4j** - property graph representation
-4. **Run analytics** comparing both approaches
-5. **Generate insights** and recommendations
+### RDF & Semantic Web
+- **Triple**: The atomic unit - (Subject, Predicate, Object)
+- **URI**: Unique identifiers for resources
+- **Namespace**: Prefixes to avoid naming conflicts
+- **Ontology**: Formal definition of concepts and relationships
+- **SPARQL**: SQL-like query language for RDF
 
-### **Key Files:**
-- `rdf_builder.py`: Converts CSV → RDF triples
-- `neo4j_loader.py`: Converts CSV → Property graph
-- `analytics.py`: Compares query results from both
-- `pipeline.py`: Orchestrates everything
+### Neo4j & Property Graphs
+- **Node**: An entity with labels and properties
+- **Relationship**: A typed, directed connection between nodes
+- **Cypher**: Declarative graph query language using ASCII art patterns
 
----
-
-## **Query Comparison:**
-
-### **Same Question, Different Languages:**
-
-**SPARQL (RDF):**
-```sparql
-SELECT ?title WHERE {
-  ?movie movie:hasTitle ?title .
-  ?movie movie:directedBy ?director .
-  ?director foaf:name "Christopher Nolan" .
-}
-```
-
-**Cypher (Neo4j):**
-```cypher
-MATCH (m:Movie)-[:DIRECTED_BY]->(d:Director {name: "Christopher Nolan"})
-RETURN m.title
-```
-
-Both find "movies directed by Christopher Nolan" but use different syntax.
+### When to Use What?
+- **Use RDF** when you need: standards compliance, reasoning, linked data, data integration
+- **Use Neo4j** when you need: performance, intuitive queries, real-time applications
 
 ---
 
-## **Why Knowledge Graphs Matter:**
+## 🔮 Future Improvements
 
-### **Traditional Problems:**
-- Data in silos (separate tables)
-- Complex joins for relationships
-- Hard to find indirect connections
-
-### **Knowledge Graph Solutions:**
-- **Connected data**: Everything linked
-- **Easy traversal**: Follow relationships naturally  
-- **Pattern discovery**: Find hidden connections
-- **Recommendations**: "Movies like this one"
-- **Reasoning**: Infer new knowledge
+- [ ] Add more movies (integrate with IMDB/TMDB API)
+- [ ] Add actors and their relationships
+- [ ] Implement recommendation algorithms
+- [ ] Connect to external knowledge bases (Wikidata)
+- [ ] Build a web interface
 
 ---
 
-## **Real-World Applications:**
+## 📖 Resources
 
-### **What We Built (Simple):**
-- Movie recommendations based on shared genres
-- Director collaboration networks
-- Genre co-occurrence analysis
-
-### **Enterprise Examples:**
-- **Google**: Search results with knowledge panels
-- **Amazon**: Product recommendations
-- **LinkedIn**: "People you may know"
-- **Netflix**: Content recommendation engine
+- [RDFLib Documentation](https://rdflib.readthedocs.io/)
+- [SPARQL 1.1 Specification](https://www.w3.org/TR/sparql11-query/)
+- [Neo4j Documentation](https://neo4j.com/docs/)
+- [W3C RDF Primer](https://www.w3.org/TR/rdf11-primer/)
 
 ---
 
-## **When to Use Each:**
-
-### **Use RDF/SPARQL When:**
-- Need semantic standards compliance
-- Building for the semantic web
-- Complex reasoning requirements
-- Integration with external linked data
-
-### **Use Neo4j/Cypher When:**
-- Need high performance graph queries
-- Intuitive query language preferred
-- Real-time recommendations
-- Graph analytics and algorithms
-
----
-
-## **Technical Architecture:**
-
-```
-CSV Data
-    ↓
-┌─────────────────┬─────────────────┐
-│   RDF Builder   │  Neo4j Loader   │
-│   (Triples)     │ (Property Graph)│
-└─────────────────┴─────────────────┘
-    ↓                       ↓
-┌─────────────────┬─────────────────┐
-│ SPARQL Queries  │ Cypher Queries  │
-│ (Pattern Match) │ (Graph Traversal)│
-└─────────────────┴─────────────────┘
-    ↓                       ↓
-┌─────────────────────────────────────┐
-│         Analytics Engine            │
-│    (Compare Results & Insights)     │
-└─────────────────────────────────────┘
-```
-
-**Bottom Line**: We built the same knowledge representation in two different ways to compare their strengths and learn both approaches to graph databases.
-
-
-
-
-# **Updated README.md Section - Engineering Focus**
-
-Add this section to your README.md after the project overview:
-
-```markdown
-## 🔧 Engineering Approach & Architecture
-
-### **Problem Statement**
-Traditional relational databases struggle with complex relationships and multi-hop queries. This project demonstrates two modern approaches to graph data modeling and querying.
-
-### **Technical Solution**
-We implemented the **same movie recommendation system** using two different graph database paradigms to compare their strengths:
-
-```
-Raw CSV Data
-     ↓
-┌─────────────────┬─────────────────┐
-│   RDF/SPARQL    │   Neo4j/Cypher  │
-│  (Semantic Web) │ (Property Graph)│
-└─────────────────┴─────────────────┘
-     ↓                     ↓
-┌─────────────────┬─────────────────┐
-│ Triple Store    │ Graph Database  │
-│ Standards-based │ Performance-opt │
-└─────────────────┴─────────────────┘
-```
-
-### **Implementation Details**
-
-#### **RDF Implementation (`src/rdf_builder.py`)**
-- **Data Model**: Subject-Predicate-Object triples
-- **Storage**: In-memory RDFLib graph, serialized as Turtle
-- **Schema**: OWL ontology with formal class definitions
-- **Queries**: SPARQL 1.1 with pattern matching
-
-```python
-# Example triple creation
-movie_uri = URIRef(f"{MOVIE}movie_{movie_id}")
-graph.add((movie_uri, RDF.type, MOVIE.Movie))
-graph.add((movie_uri, MOVIE.hasTitle, Literal(title)))
-```
-
-#### **Neo4j Implementation (`src/neo4j_loader.py`)**
-- **Data Model**: Labeled property graph
-- **Storage**: Neo4j database with ACID transactions
-- **Schema**: Constraints and indexes for performance
-- **Queries**: Cypher with graph traversal patterns
-
-```python
-# Example node creation
-CREATE (m:Movie {id: $movie_id, title: $title, year: $year})
-MERGE (d:Director {name: $director})
-MERGE (m)-[:DIRECTED_BY]->(d)
-```
-
-### **Performance Characteristics**
-
-| Aspect | RDF/SPARQL | Neo4j/Cypher |
-|--------|------------|--------------|
-| **Query Speed** | Slower (pattern matching) | Faster (index-based traversal) |
-| **Memory Usage** | Higher (triple overhead) | Lower (optimized storage) |
-| **Scalability** | Limited (in-memory) | High (disk-based, clustering) |
-| **Standards** | W3C compliant | Proprietary but intuitive |
-| **Learning Curve** | Steep (semantic concepts) | Moderate (SQL-like syntax) |
-
-### **Query Complexity Comparison**
-
-**Find movies by director with rating > 8.5:**
-
-**SPARQL (12 lines):**
-```sparql
-PREFIX movie: <http://movie-kg.org/ontology#>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-
-SELECT ?title ?rating
-WHERE {
-    ?movie a movie:Movie .
-    ?movie movie:hasTitle ?title .
-    ?movie movie:hasRating ?rating .
-    ?movie movie:directedBy ?director .
-    ?director foaf:name "Christopher Nolan" .
-    FILTER(?rating > 8.5)
-}
-ORDER BY ?rating DESC
-```
-
-**Cypher (3 lines):**
-```cypher
-MATCH (m:Movie)-[:DIRECTED_BY]->(d:Director {name: "Christopher Nolan"})
-WHERE m.rating > 8.5
-RETURN m.title, m.rating ORDER BY m.rating DESC
-```
-
-### **Engineering Trade-offs**
-
-#### **Choose RDF When:**
-- ✅ **Data Integration**: Merging datasets from multiple sources
-- ✅ **Semantic Reasoning**: Need to infer new relationships
-- ✅ **Standards Compliance**: Government/academic requirements
-- ✅ **Future-proofing**: Long-term data preservation
-
-#### **Choose Neo4j When:**
-- ✅ **Performance**: Sub-second response times required
-- ✅ **Real-time Analytics**: Live recommendation systems
-- ✅ **Developer Productivity**: Faster development cycles
-- ✅ **Operational Simplicity**: Standard database operations
-
-### **Production Considerations**
-
-#### **RDF Deployment:**
-```bash
-# Typical RDF stack
-Apache Jena Fuseki (SPARQL endpoint)
-→ TDB2 (triple store)
-→ Load balancer
-→ Application layer
-```
-
-#### **Neo4j Deployment:**
-```bash
-# Typical Neo4j stack
-Neo4j Cluster (3+ nodes)
-→ Causal clustering
-→ Read replicas
-→ Application layer (Bolt driver)
-```
-
-### **Lessons Learned**
-
-1. **Data Modeling**: RDF requires more upfront ontology design
-2. **Query Optimization**: Neo4j indexes are crucial for performance  
-3. **Development Speed**: Cypher is faster to learn and debug
-4. **Maintenance**: RDF needs more specialized knowledge
-5. **Ecosystem**: Neo4j has richer tooling and community support
-
-### **Real-World Applications**
-
-**This architecture pattern is used by:**
-- **Netflix**: Recommendation graphs (Neo4j-style)
-- **Google Knowledge Graph**: Search results (RDF-style)  
-- **LinkedIn**: Social networks (Property graph approach)
-- **Pharmaceutical companies**: Drug discovery (RDF for data integration)
-
-### **Scalability Benchmarks**
-
-Based on our implementation with 7 movies:
-
-| Operation | RDF (ms) | Neo4j (ms) | Winner |
-|-----------|----------|------------|---------|
-| Data Loading | 50 | 200* | RDF |
-| Simple Query | 5 | 2 | Neo4j |
-| Complex Join | 15 | 5 | Neo4j |
-| Aggregation | 10 | 3 | Neo4j |
-
-*Neo4j slower due to constraint creation and network overhead
-
-**Projected at 1M+ nodes**: Neo4j would significantly outperform RDF.
-
-### **Next Steps for Production**
-
-1. **Horizontal Scaling**: 
-   - RDF: Implement with Apache Jena TDB2 + clustering
-   - Neo4j: Set up causal cluster with read replicas
-
-2. **Caching Strategy**:
-   - RDF: Redis for frequent SPARQL results
-   - Neo4j: Built-in query plan caching
-
-3. **Monitoring**:
-   - RDF: Custom metrics for SPARQL query performance
-   - Neo4j: Built-in metrics via JMX/Prometheus
-
-4. **Security**:
-   - RDF: SPARQL endpoint authentication
-   - Neo4j: Role-based access control (RBAC)
-```
-
----
-
-**This addition makes your README more engineering-focused by:**
-
-1. **Technical depth** - Shows you understand architecture decisions
-2. **Performance analysis** - Includes benchmarks and trade-offs  
-3. **Production readiness** - Discusses scaling and deployment
-4. **Engineering judgment** - Clear guidance on when to use what
-5. **Real-world context** - Links to actual industry usage
-
-**Should I add this to your README.md?** This positions you as someone who doesn't just code tutorials, but understands production engineering decisions.
+*Created as a learning project for Knowledge Graphs and Semantic Web technologies.*
