@@ -62,7 +62,6 @@ dc:   http://purl.org/dc/elements/1.1/
 ```
 
 ---
-
 ### RDFS (RDF Schema)
 
 **Class Constructs:**
